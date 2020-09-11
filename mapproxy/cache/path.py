@@ -57,12 +57,11 @@ def dimensions_part(dimensions):
     """
     if dimensions:
         dims = NoCaseMultiDict(dimensions)
-        dimensionlist = list(dims.keys())
-        val_dim = [item for item in dimensionlist if item.startswith('dim_')][0]
-        dimensionlist.remove(val_dim)
-        dimensionlist.append(val_dim) #dim_ last element 
-        return os.path.join(*(map(lambda k: k + "-" + str(dims.get(k, 'default')),
-                                      dimensionlist)))
+        predefined_dims, custom_dims = [], []
+        for dim in dims.keys():
+            (custom_dims if dim.startswith('dim_') else predefined_dims).append(dim)
+        dim_keys = sorted(predefined_dims) + sorted(custom_dims)
+        return os.path.join(*(map(lambda k: k + "-" + str(dims.get(k, 'default')), dim_keys)))
     else:
         return ""
 
@@ -96,7 +95,7 @@ def tile_location_tc(tile, cache_dir, file_ext, create_dir=False, dimensions=Non
     """
     if tile.location is None:
         x, y, z = tile.coord
-        
+
         parts = (cache_dir,
                 dimensions_part(dimensions),
                 level_part(z),
